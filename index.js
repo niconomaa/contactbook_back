@@ -2,14 +2,23 @@ const { ApolloServer, gql } = require('apollo-server');
 
 const typeDefs = gql`
   type Query {
-    me: Person
+    me(uid: String!): Person
+  }
+
+ type Mutation {
+   addNewContactPerson(phoneNumber: String!): Person
+   markMeAsInfected(uid: String!): Person
+   addPerson(phoneNumber: String!): Person  
   }
 
   type Person {
-    id: String
-    phoneNumber: String
+    uid: String
+    phoneNumber : String
+    verified: Boolean
+    infected: Boolean
     contactedPersons: [Person]
   }
+
 `;
 
 const server = new ApolloServer({
@@ -20,3 +29,5 @@ const server = new ApolloServer({
 server.listen().then(({ url }) => {
   console.log(`🚀 Server ready at ${url}`)
 });
+
+
