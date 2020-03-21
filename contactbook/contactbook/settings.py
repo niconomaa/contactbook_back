@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 
 import os
 
+from neomodel import config
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -75,22 +77,16 @@ WSGI_APPLICATION = 'contactbook.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    }
-}
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+#     }
+# }
 
-NEO4J_DATABASES = {
-    'default': {
-        'HOST': 'localhost',
-        'PORT': 7474,
-        'ENDPOINT': '/db/data'
-    }
-}
-
-DATABASE_ROUTERS = ['neo4django.utils.Neo4djangoIntegrationRouter']
+# Neo4j Database
+config.DATABASE_URL = 'bolt://neo4j:contactbook@0.0.0.0:7687'
+config.ENCRYPTED_CONNECTION = False
 
 # Password validation
 # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators
