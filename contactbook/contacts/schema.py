@@ -1,5 +1,4 @@
 import graphene
-from graphene_django.types import DjangoObjectType
 from contacts.models import Person
 
 '''
@@ -14,7 +13,6 @@ class PersonType(graphene.ObjectType):
     infected = graphene.Boolean()
     incubation_start_date = graphene.Date()
 
-
 class AddPerson(graphene.Mutation):
     person = graphene.Field(PersonType)
 
@@ -22,12 +20,20 @@ class AddPerson(graphene.Mutation):
         mobile_phone = graphene.String(required=True)
 
     def mutate(self, info, mobile_phone):
-        person = Person(
-            mobile_phone=mobile_phone,
-            verified=False,
-            infected=False
-        )
-        person.save()
+
+        # only make new entry if the number hasn't been added yet
+        if Person.nodes.get_or_none(mobile_phone=mobile_phone) is None:
+            person = Person(
+                mobile_phone=mobile_phone,
+                verified=False,
+                infected=False
+            )
+            person.save()
+        else:
+            person = Person.nodes.get(mobile_phone=mobile_phone)
+            person.verified=False
+            person.infected=False
+            person.save()
 
         return AddPerson(person=person)
 
@@ -45,9 +51,35 @@ class MarkMeAsInfected(graphene.Mutation):
 
         return MarkMeAsInfected(person=person)
 
+
+class AddNewContactPerson(graphene.Mutation):
+    person = graphene.Field(PersonType)
+
+    class Arguments:
+        my_uid = graphene.String(required=True)
+        contact_mobile_phone = graphene.String(required=True)
+
+    def mutate(self, info, my_uid, contact_mobile_phone):
+
+        # if the person hasn't yet registered, make new entry for number
+        if Person.nodes.get_or_none(mobile_phone=contact_mobile_phone) is None:
+            contact_person = Person(
+                mobile_phone=contact_mobile_phone
+            )
+            contact_person.save()
+        else:
+            contact_person = Person.nodes.get(mobile_phone=contact_mobile_phone)
+
+        person = Person.nodes.get(uid=my_uid)
+
+        person.contacted_persons.connect(contact_person)
+
+        return AddNewContactPerson(person=person)
+
 class Mutation(graphene.ObjectType):
     add_person = AddPerson.Field()
     mark_me_as_infected = MarkMeAsInfected.Field()
+    add_new_contact_person = AddNewContactPerson.Field()
 
 class Query(graphene.ObjectType):
     name = 'Query'
