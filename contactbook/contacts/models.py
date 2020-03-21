@@ -30,7 +30,7 @@ class Person(StructuredNode):
     contacted_persons = Relationship('Person', 'HAS_TOUCHED', model=ContactRel)
 
     def get_contacted_persons_after_infection(self):
-        """ Traverse along relationships of self in order to get all possibly infected contact persons.
+        """ WIP: Traverse along relationships of self in order to get all possibly infected contact persons.
 
         :return: set of nodes of type Person
         """
