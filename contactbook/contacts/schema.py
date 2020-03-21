@@ -8,8 +8,12 @@ NOTE:   It is not possible to use 'DjangoObjectType' with Neomodels since they d
 '''
 
 class PersonType(graphene.ObjectType):
-    mobile_phone = graphene.String()
     uid = graphene.String()
+    mobile_phone = graphene.String()
+    verified = graphene.Boolean()
+    infected = graphene.Boolean()
+    incubation_start_date = graphene.Date()
+
 
 class AddPerson(graphene.Mutation):
     person = graphene.Field(PersonType)
@@ -20,13 +24,30 @@ class AddPerson(graphene.Mutation):
     def mutate(self, info, mobile_phone):
         person = Person(
             mobile_phone=mobile_phone,
+            verified=False,
+            infected=False
         )
         person.save()
 
         return AddPerson(person=person)
 
+class MarkMeAsInfected(graphene.Mutation):
+    person = graphene.Field(PersonType)
+
+    class Arguments:
+        uid = graphene.String(required=True)
+
+    def mutate(self, info, uid):
+        person = Person.nodes.get(uid=uid)
+
+        person.infected = True
+        person.save()
+
+        return MarkMeAsInfected(person=person)
+
 class Mutation(graphene.ObjectType):
     add_person = AddPerson.Field()
+    mark_me_as_infected = MarkMeAsInfected.Field()
 
 class Query(graphene.ObjectType):
     name = 'Query'
