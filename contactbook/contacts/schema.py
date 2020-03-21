@@ -1,10 +1,12 @@
 import graphene
+import datetime
 from contacts.models import Person
 
 '''
 NOTE:   It is not possible to use 'DjangoObjectType' with Neomodels since they do not inherit from Django base models.
         For this reason we have to use the basic 'ObjectType' for Neomodels here. 
 '''
+
 
 class PersonType(graphene.ObjectType):
     uid = graphene.String()
@@ -13,6 +15,7 @@ class PersonType(graphene.ObjectType):
     verified = graphene.Boolean()
     infected = graphene.Boolean()
     incubation_start_date = graphene.Date()
+
 
 class AddPerson(graphene.Mutation):
     person = graphene.Field(PersonType)
@@ -37,6 +40,7 @@ class AddPerson(graphene.Mutation):
             person.save()
 
         return AddPerson(person=person)
+
 
 class MarkMeAsInfected(graphene.Mutation):
     person = graphene.Field(PersonType)
@@ -72,10 +76,13 @@ class AddNewContactPerson(graphene.Mutation):
             contact_person = Person.nodes.get(mobile_phone=contact_mobile_phone)
 
         person = Person.nodes.get(uid=my_uid)
-
-        person.contacted_persons.connect(contact_person)
+        rel = person.contacted_persons.connect(contact_person)
+        rel.date = datetime.datetime.now()
+        rel.location = "Unknown"
+        rel.save()
 
         return AddNewContactPerson(person=person)
+
 
 class ShouldIBeWorried(graphene.Mutation):
     person = graphene.Field(PersonType)
@@ -126,6 +133,7 @@ class Mutation(graphene.ObjectType):
     add_new_contact_person = AddNewContactPerson.Field()
     should_i_be_worried = ShouldIBeWorried.Field()
 
+
 class Query(graphene.ObjectType):
     name = 'Query'
     description = '...'
@@ -146,7 +154,8 @@ class Query(graphene.ObjectType):
         # Use 'Person.nodes' instead of 'Person.objects' here
         return Person.nodes.all()
 
+
 schema = graphene.Schema(
-    query = Query,
-    mutation = Mutation
+    query=Query,
+    mutation=Mutation
 )
