@@ -11,27 +11,22 @@ class PersonType(graphene.ObjectType):
     mobile_phone = graphene.String()
     uid = graphene.String()
 
-"""
-class CreateUser(graphene.Mutation):
-    user = graphene.Field(PersonType)
+class AddPerson(graphene.Mutation):
+    person = graphene.Field(PersonType)
 
     class Arguments:
-        username = graphene.String(required=True)
-        password = graphene.String(required=True)
-        email = graphene.String(required=True)
+        mobile_phone = graphene.String(required=True)
 
-    def mutate(self, info, username, password, email):
-        user = User(
-            username=username,
-            email=email
+    def mutate(self, info, mobile_phone):
+        person = Person(
+            mobile_phone=mobile_phone,
         )
-        user.set_password(password)
-        user.save()
+        person.save()
 
-        return CreateUser(user=user)
+        return AddPerson(person=person)
 
 class Mutation(graphene.ObjectType):
-    create_user = CreateUser.Field() """
+    add_person = AddPerson.Field()
 
 class Query(graphene.ObjectType):
     name = 'Query'
@@ -43,7 +38,7 @@ class Query(graphene.ObjectType):
     )
 
     def resolve_me(self, info, uid):
-        return Person.nodes.get(id=uid)
+        return Person.nodes.get(uid=uid)
 
     all_persons = graphene.List(
         PersonType
@@ -55,5 +50,5 @@ class Query(graphene.ObjectType):
 
 schema = graphene.Schema(
     query = Query,
-    #mutation = Mutation
+    mutation = Mutation
 )
