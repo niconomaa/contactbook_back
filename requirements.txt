@@ -1,3 +1,5 @@
 django
 graphene
 graphene-django
+neo4django
+neo4j

@@ -37,7 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'graphene_django'
+    'graphene_django',
+    'contacts'
 ]
 
 MIDDLEWARE = [
@@ -81,6 +82,15 @@ DATABASES = {
     }
 }
 
+NEO4J_DATABASES = {
+    'default': {
+        'HOST': 'localhost',
+        'PORT': 7474,
+        'ENDPOINT': '/db/data'
+    }
+}
+
+DATABASE_ROUTERS = ['neo4django.utils.Neo4djangoIntegrationRouter']
 
 # Password validation
 # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators
