@@ -26,7 +26,7 @@ class Person(StructuredNode):
     infected = BooleanProperty()
     incubation_start_date = DateProperty()
 
-    contacted_persons = RelationshipTo('Person', 'HAS_TOUCHED', model=ContactRel)
+    contacted_persons = Relationship('Person', 'HAS_TOUCHED', model=ContactRel)
 
     def get_contacted_persons(self, person):
 
