@@ -2,3 +2,4 @@ django
 graphene
 graphene-django
 neo4j
+neomodel
