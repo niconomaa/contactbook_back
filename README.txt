@@ -21,3 +21,9 @@ docker run \
     --env NEO4J_AUTH=neo4j/test \
     neo4j:latest
 ```
+
+# graphene information
+one schema.py in main folder, one query wrapping all other queries
+one schema.py in every application
+
+in main urls.py include graphql endpoint
