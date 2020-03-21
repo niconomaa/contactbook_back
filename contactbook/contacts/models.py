@@ -16,9 +16,3 @@ class Contact(StructuredNode):
     email = StringProperty()
 
     contacts = RelationshipTo('Contact', 'HAS_TOUCHED')
-
-
-# class ContactEvent(models.Model):
-#     contact_A = models.ForeignKey(Contact, on_delete=models.CASCADE)
-#     contact_B = models.ForeignKey(Contact, on_delete=models.CASCADE)
-#     date = models.DateField()
