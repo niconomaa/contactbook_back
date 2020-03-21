@@ -22,5 +22,5 @@ for person in Person.nodes.all():
             continue
         rel = person.contacted_persons.connect(contacted_person)
         rel.date = datetime.datetime.now()
-        rel.date = "Unknown"
+        rel.location = "Unknown"
         rel.save()
