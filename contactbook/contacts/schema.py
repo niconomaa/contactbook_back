@@ -9,6 +9,7 @@ NOTE:   It is not possible to use 'DjangoObjectType' with Neomodels since they d
 class PersonType(graphene.ObjectType):
     uid = graphene.String()
     mobile_phone = graphene.String()
+    danger = graphene.String()
     verified = graphene.Boolean()
     infected = graphene.Boolean()
     incubation_start_date = graphene.Date()
@@ -76,10 +77,54 @@ class AddNewContactPerson(graphene.Mutation):
 
         return AddNewContactPerson(person=person)
 
+class ShouldIBeWorried(graphene.Mutation):
+    person = graphene.Field(PersonType)
+
+    class Arguments:
+        uid = graphene.String(required=True)
+
+    def mutate(self, info, uid):
+        person = Person.nodes.get(uid=uid)
+
+        connected_infected = person.contacted_persons.search(infected=True)
+        connected_healthy = person.contacted_persons.search(infected=False)
+        sum_infected = len(connected_infected)
+        sum_healthy = len(connected_healthy)
+
+        connected_healthy_last = []
+
+        if sum_infected > 0:
+            danger = 1
+        else:
+            for node in connected_healthy:
+                connected_infected_sec = node.contacted_persons.search(infected=True)
+                connected_healthy_sec = node.contacted_persons.search(infected=False)
+                connected_healthy_last.append(connected_healthy_sec)
+                sum_infected += len(connected_infected_sec)
+                sum_healthy += len(connected_healthy_sec)
+
+            for node in [item for sublist in connected_healthy_last for item in sublist]:
+                connected_infected_third = node.contacted_persons.search(infected=True)
+                connected_healthy_third = node.contacted_persons.search(infected=False)
+                sum_infected += len(connected_infected_third)
+                sum_healthy += len(connected_healthy_third)
+
+            if (sum_infected + sum_healthy) != 0:
+                danger = sum_infected / (sum_infected + sum_healthy)
+            else:
+                danger = 0
+
+        person.danger = danger
+        person.save()
+
+        return ShouldIBeWorried(person=person)
+
+
 class Mutation(graphene.ObjectType):
     add_person = AddPerson.Field()
     mark_me_as_infected = MarkMeAsInfected.Field()
     add_new_contact_person = AddNewContactPerson.Field()
+    should_i_be_worried = ShouldIBeWorried.Field()
 
 class Query(graphene.ObjectType):
     name = 'Query'

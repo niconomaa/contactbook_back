@@ -22,6 +22,7 @@ class ContactRel(StructuredRel):
 class Person(StructuredNode):
     uid = UniqueIdProperty()
     mobile_phone = StringProperty(unique_index=True)
+    danger = StringProperty()
     verified = BooleanProperty()
     infected = BooleanProperty()
     incubation_start_date = DateProperty()
