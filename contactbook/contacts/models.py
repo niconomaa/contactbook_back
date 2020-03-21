@@ -9,10 +9,10 @@ from neomodel import (
 )
 
 
-class Contact(StructuredNode):
+class Person(StructuredNode):
     first_name = StringProperty()
     last_name = StringProperty()
     mobile_phone = StringProperty()
     email = StringProperty()
 
-    contacts = RelationshipTo('Contact', 'HAS_TOUCHED')
+    contacted_persons = RelationshipTo('Person', 'HAS_TOUCHED')
