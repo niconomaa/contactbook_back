@@ -187,6 +187,14 @@ class Query(graphene.ObjectType):
 
         return False
 
+    streak = graphene.Int(
+        uid=graphene.String()
+    )
+
+    def resolve_streak(self, info, uid):
+        person = Person.nodes.get(uid=uid)
+        return person.get_streak()
+
 
 schema = graphene.Schema(
     query=Query,
