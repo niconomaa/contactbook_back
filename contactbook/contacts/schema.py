@@ -103,6 +103,7 @@ class AddNewContactPerson(graphene.Mutation):
 
         return AddNewContactPerson(person=contact_person)
 
+
 class HelperMethods:
     # see if the connection between two nodes is legit (my_node is tuple(node, last_connection_time))
     def is_valid_traversal(self, my_node, node):
