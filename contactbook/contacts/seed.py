@@ -11,7 +11,8 @@ for i in range(30):
         mobile_phone=random.randint(10000000, 99999999),    # Random mobile phone number with 8 digits
         verified=True,
         infected=False,
-        incubation_start_date=None
+        incubation_start_date=None,
+        danger="0"
     ).save()
 
 for person in Person.nodes.all():
