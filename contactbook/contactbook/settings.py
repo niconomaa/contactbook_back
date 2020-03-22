@@ -85,7 +85,11 @@ WSGI_APPLICATION = 'contactbook.wsgi.application'
 # }
 
 # Neo4j Database
-config.DATABASE_URL = 'bolt://neo4j:contactbook@0.0.0.0:7687'
+if os.getenv('GRAPHENEDB_URL'):
+    config.DATABASE_URL = os.getenv('GRAPHENEDB_URL')
+else:
+    config.DATABASE_URL = 'bolt://neo4j:contactbook@0.0.0.0:7687'
+
 config.MAX_POOL_SIZE = 3600
 config.ENCRYPTED_CONNECTION = False
 
