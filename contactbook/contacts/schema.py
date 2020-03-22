@@ -100,7 +100,7 @@ class AddNewContactPerson(graphene.Mutation):
         rel.location = "Unknown"
         rel.save()
 
-        return AddNewContactPerson(person=person)
+        return AddNewContactPerson(person=contact_person)
 
 
 class ShouldIBeWorried(graphene.Mutation):
