@@ -22,8 +22,8 @@ for person in Person.nodes.all():
         rand = random.randint(0, 10)
         if rand > 0:
             continue
-        rel = person.contacted_persons.connect(contacted_person)
-        # TODO: Generate random datetime within last days.
-        rel.date = datetime.datetime.now()
-        rel.location = "Unknown"
-        rel.save()
+        relation = person.contacted_persons.connect(contacted_person)
+        delta = datetime.timedelta(days=random.randint(0, 13))
+        relation.date = datetime.datetime.now() - delta
+        relation.location = "Unknown"
+        relation.save()
