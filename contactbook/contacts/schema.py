@@ -1,5 +1,6 @@
 import graphene
 import datetime
+from django.utils import timezone
 from contacts.models import Person
 
 '''
@@ -103,6 +104,27 @@ class AddNewContactPerson(graphene.Mutation):
         return AddNewContactPerson(person=contact_person)
 
 
+class HelperMethods:
+    # see if the connection between two nodes is legit (my_node is tuple(node, last_connection_time))
+    def is_valid_traversal(self, my_node, node):
+        time_next_connection = my_node[0].contacted_persons.relationship(node).date
+        return_val = False
+        # only go back in time and no further than 30 days
+        if my_node[1] > time_next_connection > (timezone.now() - datetime.timedelta(30)):
+            return_val = True
+
+        return return_val
+
+    # return a list of tuples(node, last_connection_time) of adjacent valid nodes
+    def make_adj_tuples(self, my_node, contacted):
+        adj = []
+        for node in contacted:
+            if self.is_valid_traversal(my_node, node):
+                adj.append((node, my_node[0].contacted_persons.relationship(node).date))
+
+        return adj
+
+
 class ShouldIBeWorried(graphene.Mutation):
     person = graphene.Field(PersonType)
 
@@ -110,39 +132,35 @@ class ShouldIBeWorried(graphene.Mutation):
         uid = graphene.String(required=True)
 
     def mutate(self, info, uid):
+        helper = HelperMethods()
         person = Person.nodes.get(uid=uid)
+        now = timezone.now()
+        next_layer = []
+        my_node = (person, now)
+        contacted = person.contacted_persons.all()
+        adjacent = helper.make_adj_tuples(my_node, contacted)
+        depth = 3
+        incubation_healing_time = datetime.timedelta(14)
 
-        connected_infected = person.contacted_persons.search(infected=True)
-        connected_healthy = person.contacted_persons.search(infected=False)
-        sum_infected = len(connected_infected)
-        sum_healthy = len(connected_healthy)
+        for i in range(depth):
+            for node in adjacent:
+                if node[0].infected:
+                    incubation_t = node[0].incubation_start_date
+                    if (incubation_t - incubation_healing_time) < now < (incubation_t + incubation_healing_time):
+                        person.danger = i
+                        person.save()
+                        return ShouldIBeWorried(person=person)
 
-        connected_healthy_last = []
+                new_connected = node[0].contacted_persons.all()
+                new_adj = helper.make_adj_tuples(node, new_connected)
+                for a in new_adj:
+                    next_layer.append(a)
 
-        if sum_infected > 0:
-            danger = 1
-        else:
-            for node in connected_healthy:
-                connected_infected_sec = node.contacted_persons.search(infected=True)
-                connected_healthy_sec = node.contacted_persons.search(infected=False)
-                connected_healthy_last.append(connected_healthy_sec)
-                sum_infected += len(connected_infected_sec)
-                sum_healthy += len(connected_healthy_sec)
+            adjacent = next_layer
+            next_layer = []
 
-            for node in [item for sublist in connected_healthy_last for item in sublist]:
-                connected_infected_third = node.contacted_persons.search(infected=True)
-                connected_healthy_third = node.contacted_persons.search(infected=False)
-                sum_infected += len(connected_infected_third)
-                sum_healthy += len(connected_healthy_third)
-
-            if (sum_infected + sum_healthy) != 0:
-                danger = sum_infected / (sum_infected + sum_healthy)
-            else:
-                danger = 0
-
-        person.danger = danger
+        person.danger = 3
         person.save()
-
         return ShouldIBeWorried(person=person)
 
 
