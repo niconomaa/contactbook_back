@@ -1,1 +1,1 @@
-web: gunicorn contactbook.wsgi
+web: sh ./contactbook/run.sh
