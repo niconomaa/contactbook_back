@@ -155,9 +155,6 @@ class Mutation(graphene.ObjectType):
 
 
 class Query(graphene.ObjectType):
-    name = 'Query'
-    description = '...'
-
     me = graphene.Field(
         PersonType,
         uid=graphene.String()
