@@ -100,7 +100,7 @@ class AddNewContactPerson(graphene.Mutation):
         rel.location = "Unknown"
         rel.save()
 
-        return AddNewContactPerson(person=person)
+        return AddNewContactPerson(person=contact_person)
 
 
 class ShouldIBeWorried(graphene.Mutation):
@@ -155,9 +155,6 @@ class Mutation(graphene.ObjectType):
 
 
 class Query(graphene.ObjectType):
-    name = 'Query'
-    description = '...'
-
     me = graphene.Field(
         PersonType,
         uid=graphene.String()
@@ -173,6 +170,22 @@ class Query(graphene.ObjectType):
     def resolve_all_persons(self, info, **kwargs):
         # Use 'Person.nodes' instead of 'Person.objects' here
         return Person.nodes.all()
+
+    has_contact_today = graphene.Boolean(
+        uid=graphene.String()
+    )
+
+    def resolve_has_contact_today(self, info, uid):
+        person = Person.nodes.get(uid=uid)
+
+        for contact_person in person.contacted_persons:
+            rel = person.contacted_persons.relationship(contact_person)
+            today = datetime.datetime.now()
+
+            if today.day == rel.date.day:
+                return True
+
+        return False
 
 
 schema = graphene.Schema(
