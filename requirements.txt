@@ -3,3 +3,4 @@ graphene
 graphene-django
 neo4j
 neomodel
+gunicorn
