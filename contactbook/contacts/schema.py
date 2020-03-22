@@ -25,21 +25,20 @@ class AddPerson(graphene.Mutation):
         mobile_phone = graphene.String(required=True)
 
     def mutate(self, info, mobile_phone):
+        person = Person.nodes.get_or_none(mobile_phone=mobile_phone)
 
-        # only make new entry if the number hasn't been added yet
-        if Person.nodes.get_or_none(mobile_phone=mobile_phone) is None:
+        if person is None:
+            # Person does not exist as node yet
             person = Person(
                 mobile_phone=mobile_phone,
-                verified=False,
+                verified=True,
                 infected=False,
                 incubation_start_date=None
             )
             person.save()
-        else:
-            person = Person.nodes.get(mobile_phone=mobile_phone)
-            person.verified = False
-            person.infected = False
-            person.incubation_start_date = None
+        elif not person.verified:
+            # Person already exists as node and is to be verified
+            person.verified = True
             person.save()
 
         return AddPerson(person=person)
@@ -70,7 +69,6 @@ class MarkMeAsNotInfected(graphene.Mutation):
         person = Person.nodes.get(uid=uid)
         person.infected = False
         person.incubation_start_date = None
-        # del person.incubation_start_date
         person.save()
 
         return MarkMeAsNotInfected(person=person)
@@ -103,7 +101,7 @@ class AddNewContactPerson(graphene.Mutation):
         rel.location = "Unknown"
         rel.save()
 
-        return AddNewContactPerson(person=person)
+        return AddNewContactPerson(person=contact_person)
 
 class HelperMethods:
     # see if the connection between two nodes is legit (my_node is tuple(node, last_connection_time))
@@ -174,9 +172,6 @@ class Mutation(graphene.ObjectType):
 
 
 class Query(graphene.ObjectType):
-    name = 'Query'
-    description = '...'
-
     me = graphene.Field(
         PersonType,
         uid=graphene.String()
@@ -192,6 +187,30 @@ class Query(graphene.ObjectType):
     def resolve_all_persons(self, info, **kwargs):
         # Use 'Person.nodes' instead of 'Person.objects' here
         return Person.nodes.all()
+
+    has_contact_today = graphene.Boolean(
+        uid=graphene.String()
+    )
+
+    def resolve_has_contact_today(self, info, uid):
+        person = Person.nodes.get(uid=uid)
+
+        for contact_person in person.contacted_persons:
+            rel = person.contacted_persons.relationship(contact_person)
+            today = datetime.datetime.now()
+
+            if today.day == rel.date.day:
+                return True
+
+        return False
+
+    streak = graphene.Int(
+        uid=graphene.String()
+    )
+
+    def resolve_streak(self, info, uid):
+        person = Person.nodes.get(uid=uid)
+        return person.get_streak()
 
 
 schema = graphene.Schema(
