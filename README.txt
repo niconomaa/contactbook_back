@@ -40,3 +40,5 @@ Version 3.5 is required in order to utilize the neomodel package as an ORM in th
 
 * Open Django shell: `python manage.py shell`
 * Copy and paste contents of `contactbook/contacts/seed.py` into shell and execute. CAUTION: The script will delete all nodes and relationships before seeding.
+
+* OR: `exec(open('contacts/seed_2.py').read())`
