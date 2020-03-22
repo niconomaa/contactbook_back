@@ -1,6 +1,7 @@
 from django.db import models
 import datetime
 from neomodel.match import EITHER, Traversal
+from neomodel import db
 
 from neomodel import (
     StringProperty,
@@ -72,3 +73,11 @@ class Person(StructuredNode):
         """
         delta = datetime.datetime.now().date() - self.get_last_contact_date().date()
         return delta.days
+
+    def get_all_relationships(self):
+        """ Retrieve all relationship objects of self to connected nodes.
+
+        :return: [<Relationship>] relationship objects of self
+        """
+        results, columns = self.cypher("MATCH (:Person {uid: '" + str(self.uid) + "'})-[r]-() RETURN r")
+        return results
