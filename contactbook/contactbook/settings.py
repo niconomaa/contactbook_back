@@ -27,7 +27,9 @@ SECRET_KEY = '!04b#tz6)r8*$v+oy1oll59$imi!**1+z_qgv&8$@!g4r=yoh4'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'contactbook-back.herokuapp.com'
+]
 
 
 # Application definition
