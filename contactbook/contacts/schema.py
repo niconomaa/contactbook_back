@@ -14,7 +14,7 @@ class PersonType(graphene.ObjectType):
     danger = graphene.String()
     verified = graphene.Boolean()
     infected = graphene.Boolean()
-    incubation_start_date = graphene.Date()
+    incubation_start_date = graphene.DateTime()
 
 
 class AddPerson(graphene.Mutation):
@@ -30,13 +30,15 @@ class AddPerson(graphene.Mutation):
             person = Person(
                 mobile_phone=mobile_phone,
                 verified=False,
-                infected=False
+                infected=False,
+                incubation_start_date=None
             )
             person.save()
         else:
             person = Person.nodes.get(mobile_phone=mobile_phone)
-            person.verified=False
-            person.infected=False
+            person.verified = False
+            person.infected = False
+            person.incubation_start_date = None
             person.save()
 
         return AddPerson(person=person)
@@ -50,11 +52,27 @@ class MarkMeAsInfected(graphene.Mutation):
 
     def mutate(self, info, uid):
         person = Person.nodes.get(uid=uid)
-
         person.infected = True
+        person.incubation_start_date = datetime.datetime.now()
         person.save()
 
         return MarkMeAsInfected(person=person)
+
+
+class MarkMeAsNotInfected(graphene.Mutation):
+    person = graphene.Field(PersonType)
+
+    class Arguments:
+        uid = graphene.String(required=True)
+
+    def mutate(self, info, uid):
+        person = Person.nodes.get(uid=uid)
+        person.infected = False
+        person.incubation_start_date = None
+        # del person.incubation_start_date
+        person.save()
+
+        return MarkMeAsNotInfected(person=person)
 
 
 class AddNewContactPerson(graphene.Mutation):
@@ -69,7 +87,10 @@ class AddNewContactPerson(graphene.Mutation):
         # if the person hasn't yet registered, make new entry for number
         if Person.nodes.get_or_none(mobile_phone=contact_mobile_phone) is None:
             contact_person = Person(
-                mobile_phone=contact_mobile_phone
+                mobile_phone=contact_mobile_phone,
+                verified=False,
+                infected=False,
+                incubation_start_date=None
             )
             contact_person.save()
         else:
@@ -130,6 +151,7 @@ class ShouldIBeWorried(graphene.Mutation):
 class Mutation(graphene.ObjectType):
     add_person = AddPerson.Field()
     mark_me_as_infected = MarkMeAsInfected.Field()
+    mark_me_as_not_infected = MarkMeAsNotInfected.Field()
     add_new_contact_person = AddNewContactPerson.Field()
     should_i_be_worried = ShouldIBeWorried.Field()
 

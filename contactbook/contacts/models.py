@@ -9,14 +9,14 @@ from neomodel import (
     RelationshipTo,
     RelationshipFrom,
     Relationship,
-    DateProperty,
+    DateTimeProperty,
     BooleanProperty,
     UniqueIdProperty
 )
 
 
 class ContactRel(StructuredRel):
-    date = DateProperty()
+    date = DateTimeProperty()
     location = StringProperty()
 
 
@@ -24,9 +24,9 @@ class Person(StructuredNode):
     uid = UniqueIdProperty()
     mobile_phone = StringProperty(unique_index=True)
     danger = StringProperty(default="0")
-    verified = BooleanProperty()
-    infected = BooleanProperty()
-    incubation_start_date = DateProperty()
+    verified = BooleanProperty(required=True)
+    infected = BooleanProperty(required=True)
+    incubation_start_date = DateTimeProperty(required=False)
 
     contacted_persons = Relationship('Person', 'HAS_TOUCHED', model=ContactRel)
 
